@@ -1,0 +1,44 @@
+{
+  "name": "usco-headless-renderer",
+  "version": "0.0.1",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "ava './src/**/*.test.js' --require babel-register --verbose",
+    "test-render": "node src/serverSide/launch.js",
+    "watch": "watchify src/main -o dist/index.js -t [ babelify]"
+  },
+  "author": "Mark 'kaosat-dev' Moissette",
+  "license": "MIT",
+  "dependencies": {
+    "most": "^1.0.3",
+    "@most/create": "^1.1.3",
+    "@most/prelude": "^1.4.1",
+    "angle-normals": "^1.0.0",
+    "fast.js": "^0.1.1",
+    "gl": "^4.0.0",
+    "gl-mat4": "^1.1.4",
+    "glslify": "^5.0.2",
+    "glslify-sync": "^2.0.0",
+    "pngjs": "^2.3.1",
+    "ray-aabb-intersection": "^1.0.1",
+    "ray-sphere-intersection": "^1.0.0",
+    "ray-triangle-intersection": "^1.0.3",
+    "regl": "^1.1.1",
+    "usco-stl-parser": "github:usco/usco-stl-parser#streaming",
+    "vertices-bounding-box": "^1.0.0"
+  },
+  "devDependencies": {
+    "ava": "^0.15.2",
+    "babel-cli": "^6.6.5",
+    "babel-core": "^6.2.1",
+    "babel-preset-es2015": "^6.1.18",
+    "budo": "^8.3.0"
+  },
+  "browserify": {
+    "transform": [
+      "glslify-sync/transform",
+      "rollupify"
+    ]
+  }
+}
