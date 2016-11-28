@@ -2,12 +2,12 @@ import view from '../view'
 import fs from 'fs'
 
 import stlParser from 'usco-stl-parser'
-import objParser from 'usco-obj-parser'
+/*import objParser from 'usco-obj-parser'
 import ctmParser from 'usco-ctm-parser'
-import threeMfParser from 'usco-3mf-parser'
+import threeMfParser from 'usco-3mf-parser'*/
 
 import {getNameAndExtension} from '../../../utils/utils'
-import {postProcessParsedData, toArrayBuffer} from './parseUtils'
+//import {postProcessParsedData, toArrayBuffer} from './parseUtils'
 
 // ///////deal with command line args etc
 let args = process.argv.slice(2)
@@ -34,10 +34,12 @@ if (args.length > 0) {
 
   const parsers = {
     'stl': stlParser,
-    'obj': objParser,
+    /*'obj': objParser,
     'ctm': ctmParser,
-    '3mf': threeMfParser
+    '3mf': threeMfParser*/
   }
+
+  const regl = require('regl')(require('gl')(width, height))
 
   let data = fs.readFileSync(uri, 'binary')
   const parse = parsers[ext]
