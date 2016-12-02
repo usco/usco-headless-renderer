@@ -1,4 +1,3 @@
-import view from '../view'
 import fs from 'fs'
 
 import stlParser from 'usco-stl-parser'
@@ -6,8 +5,10 @@ import stlParser from 'usco-stl-parser'
 import ctmParser from 'usco-ctm-parser'
 import threeMfParser from 'usco-3mf-parser'*/
 
-import {getNameAndExtension} from '../../../utils/utils'
-//import {postProcessParsedData, toArrayBuffer} from './parseUtils'
+import prepareRender from './render'
+import { writeContextToFile } from './imgUtils'
+import { getNameAndExtension } from './fileUtils'
+// import {postProcessParsedData, toArrayBuffer} from './parseUtils'
 
 // ///////deal with command line args etc
 let args = process.argv.slice(2)
@@ -32,24 +33,27 @@ if (args.length > 0) {
 
   console.log('Running renderer with params', uri, resolution, outputPath)
 
+  const parseOptions = {concat: true}
   const parsers = {
-    'stl': stlParser,
-    /*'obj': objParser,
-    'ctm': ctmParser,
-    '3mf': threeMfParser*/
+    'stl': stlParser(parseOptions),
+  /*'obj': objParser,
+  'ctm': ctmParser,
+  '3mf': threeMfParser*/
   }
 
-  const regl = require('regl')(require('gl')(width, height))
+  // create webgl context
+  const gl = require('gl')(width, height)
+  // setup regl
+  const regl = require('regl')(gl, (width, height))
+  // setup render function
+  const render = prepareRender(regl)
 
-  let data = fs.readFileSync(uri, 'binary')
-  const parse = parsers[ext]
-  const parseOptions = {}
-  const parsedObs$ = parse(data, parseOptions)
-
-  parsedObs$
-    .filter(e => e.progress === undefined) // seperate out progress data
-    .map(postProcessParsedData)
-    .forEach(mesh => {
-      view({mesh, uri: outputPath, resolution}) // each time some data is parsed, render it
+  fs.createReadStream(uri)
+    .pipe(parsers[ext]) // we get a stream back
+    .on('data', function (parsedData) {
+      console.log('done with parsing') // , parsedData)
+      render({entities: [], camera: {projection:null}, view: null, background: [1, 1, 1, 1]})
+      // view({mesh, uri: outputPath, resolution}) // each time some data is parsed, render it
+      writeContextToFile(gl, 256, 256, 4, outputPath)
     })
 }
