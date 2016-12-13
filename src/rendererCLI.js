@@ -6,9 +6,30 @@ import ctmParser from 'usco-ctm-parser'
 import threeMfParser from 'usco-3mf-parser'*/
 
 import prepareRender from './render'
-import { writeContextToFile } from './imgUtils'
-import { getNameAndExtension } from './fileUtils'
-// import {postProcessParsedData, toArrayBuffer} from './parseUtils'
+import { writeContextToFile } from 'usco-image-utils'
+import { getNameAndExtension } from 'usco-file-utils'
+
+import create from '@most/create'
+import entityPrep from './utils/entityPrep'
+
+import { camera as camerabase } from './utils/camera'
+import { computeCameraToFitBounds } from 'usco-camera-utils'
+
+import * as orbitControls from 'usco-orbit-controls'
+import mat4 from 'gl-mat4'
+
+console.log('orbitControls', orbitControls)
+
+function setProjection (state, input) {
+  const projection = mat4.perspective([], state.fov, input.width / input.height, // context.viewportWidth / context.viewportHeight,
+    state.near,
+    state.far)
+  // state = Object.assign({}, state, {projection})
+  state.projection = projection
+  state.aspect = input.width / input.height
+  // state = Object.assign({}, state, update(settings, state)) // not sure
+  return state
+}
 
 // ///////deal with command line args etc
 let args = process.argv.slice(2)
@@ -48,12 +69,29 @@ if (args.length > 0) {
   // setup render function
   const render = prepareRender(regl)
 
-  fs.createReadStream(uri)
-    .pipe(parsers[ext]) // we get a stream back
-    .on('data', function (parsedData) {
-      console.log('done with parsing') // , parsedData)
-      render({entities: [], camera: {projection:null}, view: null, background: [1, 1, 1, 1]})
-      // view({mesh, uri: outputPath, resolution}) // each time some data is parsed, render it
-      writeContextToFile(gl, 256, 256, 4, outputPath)
+  const parsedData$ = create((add, end, error) => {
+    fs.createReadStream(uri)
+      .pipe(parsers[ext]) // we get a stream back
+      .on('data', function (parsedData) {
+        add(parsedData)
+      })
+  })
+  entityPrep(parsedData$, regl)
+    .forEach(function (entity) {
+      let camera = setProjection(camerabase, {width, height})
+      camera = Object.assign({}, camera, computeCameraToFitBounds({camera, bounds: entity.bounds, transforms: entity.transforms}))
+      camera = Object.assign({}, camera, orbitControls.update(orbitControls.params, camera))
+      render({entities: [entity], camera, view: camera.view, background: [1, 1, 1, 1]})
+      writeContextToFile(gl, width, height, 4, outputPath)
     })
+
+/*
+fs.createReadStream(uri)
+  .pipe(parsers[ext]) // we get a stream back
+  .on('data', function (geometry) {
+    console.log('done with parsing') // , parsedData)
+
+    render({entities: [], camera: {projection: null}, view: null, background: [1, 1, 1, 1]})
+    writeContextToFile(gl, 256, 256, 4, outputPath)
+  })*/
 }
