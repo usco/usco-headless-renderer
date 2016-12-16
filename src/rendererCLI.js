@@ -18,8 +18,6 @@ import { computeCameraToFitBounds } from 'usco-camera-utils'
 import * as orbitControls from 'usco-orbit-controls'
 import mat4 from 'gl-mat4'
 
-console.log('orbitControls', orbitControls)
-
 function setProjection (state, input) {
   const projection = mat4.perspective([], state.fov, input.width / input.height, // context.viewportWidth / context.viewportHeight,
     state.near,
