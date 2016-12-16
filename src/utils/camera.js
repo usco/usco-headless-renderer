@@ -1,5 +1,5 @@
 export const camera = {
-  position: [150, 250, 200],
+  position: [75, 75, 145],
   target: [0, 0, 0],
   fov: Math.PI / 4,
   aspect: 1,
