@@ -68,12 +68,17 @@ if (args.length > 0) {
   const render = prepareRender(regl)
 
   const parsedData$ = create((add, end, error) => {
+    const parser = parsers[ext]
+    if (!parser) {
+      error(new Error(`no parser found for ${ext} format`))
+    }
     fs.createReadStream(uri)
       .pipe(parsers[ext]) // we get a stream back
       .on('data', function (parsedData) {
         add(parsedData)
       })
   })
+
   entityPrep(parsedData$, regl)
     .forEach(function (entity) {
       let camera = setProjection(camerabase, {width, height})
