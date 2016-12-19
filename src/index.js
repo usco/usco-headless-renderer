@@ -48,8 +48,7 @@ if (args.length > 0) {
   const {ext} = getNameAndExtension(uri)
   const resolution = {width, height}
 
-  console.log('outputPath', outputPath, 'ext', ext)
-
+  //console.log('outputPath', outputPath, 'ext', ext)
   console.log('Running renderer with params', uri, resolution, outputPath)
 
   const parseOptions = {concat: true}
