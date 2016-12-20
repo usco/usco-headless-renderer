@@ -6,8 +6,9 @@ export const camera = {
 
   projection: new Float32Array(16),
   view: new Float32Array(16),
-  near: 10,// 0.01,
+  near: 10, // 0.01,
   far: 1300,
+  up: [0, 0, 1],
 
   thetaDelta: 0,
   phiDelta: 0,
