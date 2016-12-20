@@ -5,10 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = prepareRender;
 
-var _uscoRenderer = require('usco-renderer');
+var _uscoRenderUtils = require('usco-render-utils');
 
 function prepareRender(regl, params) {
-  var wrapperScope = (0, _uscoRenderer.wrapperScope)(regl);
+  var wrapperScope = (0, _uscoRenderUtils.wrapperScope)(regl);
 
   var command = function command(props) {
     var entities = props.entities,

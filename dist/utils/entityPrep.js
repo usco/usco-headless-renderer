@@ -11,7 +11,7 @@ var _uscoTransformUtils = require('usco-transform-utils');
 
 var _prepHelpers = require('./prepHelpers');
 
-var _uscoRenderer = require('usco-renderer');
+var _uscoRenderUtils = require('usco-render-utils');
 
 /* Pipeline:
   - data => process (normals computation, color format conversion) => (drawCall generation) => drawCall
@@ -21,7 +21,7 @@ var _uscoRenderer = require('usco-renderer');
 
 // helpers
 function entityPrep(rawGeometry$, regl) {
-  //NOTE : rotation needs to be manually inverted , or an additional geometry transformation applied
+  // NOTE : rotation needs to be manually inverted , or an additional geometry transformation applied
   var addedEntities$ = rawGeometry$.map(function (geometry) {
     return {
       transforms: { pos: [0, 0, 0], rot: [0, 0, Math.PI], sca: [1, 1, 1] }, // [0.2, 1.125, 1.125]},
@@ -41,10 +41,24 @@ function entityPrep(rawGeometry$, regl) {
     return entity;
   }).map(_prepHelpers.injectBounds) // we need to recompute bounds based on changes above
   .map(_prepHelpers.injectTMatrix)
-  //.tap(entity => console.log('entity done processing', entity))
+  // .tap(entity => console.log('entity done processing', entity))
   .map(function (data) {
     var geometry = data.geometry;
-    var draw = (0, _uscoRenderer.drawStaticMesh2)(regl, { geometry: geometry }); // one command per mesh, but is faster
+
+    /*const indices = data.geometry.indices
+    let indicesSub = []//new Uint32Array(indices.length/3)
+    for(let i=0,j=0; i<indices.length;i+=3,j++){
+      //indicesSub[j] = [indices[i], indices[i+1], indices[i+2]]
+      indicesSub.push([indices[i], indices[i+1], indices[i+2]])
+    }
+    data.geometry.indices = indicesSub
+    console.log('indices',indices.length)*/
+
+    if (!regl.hasExtension('oes_element_index_uint') && data.geometry.indices) {
+      data.geometry.indices = Uint16Array.from(data.geometry.indices);
+    }
+
+    var draw = (0, _uscoRenderUtils.drawStaticMesh2)(regl, { geometry: geometry }); // one command per mesh, but is faster
     var visuals = Object.assign({}, data.visuals, { draw: draw });
     var entity = Object.assign({}, data, { visuals: visuals }); // Object.assign({}, data, {visuals: {draw}})
     return entity;
