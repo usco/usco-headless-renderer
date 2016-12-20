@@ -1,4 +1,4 @@
-import { wrapperScope as makeWrapperScope } from 'usco-renderer'
+import { wrapperScope as makeWrapperScope } from 'usco-render-utils'
 
 export default function prepareRender (regl, params) {
   const wrapperScope = makeWrapperScope(regl)

@@ -2,7 +2,7 @@
 import { centerGeometry } from 'usco-geometry-utils'
 import { offsetTransformsByBounds } from 'usco-transform-utils'
 import { injectNormals, injectTMatrix, injectBounds } from './prepHelpers'
-import { drawStaticMesh2 as drawStaticMesh } from 'usco-renderer'
+import { drawStaticMesh2 as drawStaticMesh } from 'usco-render-utils'
 
 /* Pipeline:
   - data => process (normals computation, color format conversion) => (drawCall generation) => drawCall
@@ -11,7 +11,7 @@ import { drawStaticMesh2 as drawStaticMesh } from 'usco-renderer'
 */
 
 export default function entityPrep (rawGeometry$, regl) {
-  //NOTE : rotation needs to be manually inverted , or an additional geometry transformation applied
+  // NOTE : rotation needs to be manually inverted , or an additional geometry transformation applied
   const addedEntities$ = rawGeometry$
     .map(geometry => ({
       transforms: {pos: [0, 0, 0], rot: [0, 0, Math.PI], sca: [1, 1, 1]}, // [0.2, 1.125, 1.125]},
@@ -25,7 +25,7 @@ export default function entityPrep (rawGeometry$, regl) {
   )
     .map(injectNormals)
     .map(injectBounds)
-    .map(function(data){
+    .map(function (data) {
       const geometry = centerGeometry(data.geometry, data.bounds, data.transforms)
       return Object.assign({}, data, {geometry})
     })
@@ -36,9 +36,23 @@ export default function entityPrep (rawGeometry$, regl) {
     })
     .map(injectBounds) // we need to recompute bounds based on changes above
     .map(injectTMatrix)
-    //.tap(entity => console.log('entity done processing', entity))
+    // .tap(entity => console.log('entity done processing', entity))
     .map(function (data) {
       const geometry = data.geometry
+
+      /*const indices = data.geometry.indices
+      let indicesSub = []//new Uint32Array(indices.length/3)
+      for(let i=0,j=0; i<indices.length;i+=3,j++){
+        //indicesSub[j] = [indices[i], indices[i+1], indices[i+2]]
+        indicesSub.push([indices[i], indices[i+1], indices[i+2]])
+      }
+      data.geometry.indices = indicesSub
+      console.log('indices',indices.length)*/
+
+      if (!regl.hasExtension('oes_element_index_uint') && data.geometry.indices) {
+        data.geometry.indices = Uint16Array.from(data.geometry.indices)
+      }
+
       const draw = drawStaticMesh(regl, {geometry: geometry}) // one command per mesh, but is faster
       const visuals = Object.assign({}, data.visuals, {draw})
       const entity = Object.assign({}, data, {visuals}) // Object.assign({}, data, {visuals: {draw}})
