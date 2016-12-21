@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
+  "bin": {
+    "usco-headless-renderer": "dist/index.js"
+  },
   "scripts": {
     "test": "ava './test/**/*.test.js' --require babel-register --verbose",
     "build": "babel src/ -d dist",
