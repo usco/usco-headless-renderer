@@ -2,17 +2,13 @@
 'use strict';
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-/*import threeMfParser from 'usco-3mf-parser'*/
+// import make3mfStream from 'usco-3mf-parser'
 
 var _fs = require('fs');
 
 var _fs2 = _interopRequireDefault(_fs);
 
 var _most = require('most');
-
-var _uscoStlParser = require('usco-stl-parser');
-
-var _uscoStlParser2 = _interopRequireDefault(_uscoStlParser);
 
 var _uscoCtmParser = require('usco-ctm-parser');
 
@@ -21,6 +17,10 @@ var _uscoCtmParser2 = _interopRequireDefault(_uscoCtmParser);
 var _uscoObjParser = require('usco-obj-parser');
 
 var _uscoObjParser2 = _interopRequireDefault(_uscoObjParser);
+
+var _uscoStlParser = require('usco-stl-parser');
+
+var _uscoStlParser2 = _interopRequireDefault(_uscoStlParser);
 
 var _render = require('./render');
 
@@ -54,6 +54,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var version = require('../package.json').version;
+
 function setProjection(state, input) {
   var projection = _glMat2.default.perspective([], state.fov, input.width / input.height, // context.viewportWidth / context.viewportHeight,
   state.near, state.far);
@@ -66,7 +68,9 @@ function setProjection(state, input) {
 
 // ///////deal with command line args etc
 var args = process.argv.slice(2);
-
+if (args.length === 0) {
+  console.log('usco-headless-renderer v' + version + '\n    use it like this : usco-headless-renderer <PATH-TO-FILE> \'320x240\' <PATH-TO-OUTPUT.png>\n    ');
+}
 if (args.length > 0) {
   (function () {
     // more advanced params handling , for later
@@ -101,7 +105,6 @@ if (args.length > 0) {
       'stl': (0, _uscoStlParser2.default)(parseOptions),
       'ctm': _uscoCtmParser2.default,
       'obj': _uscoObjParser2.default
-
     };
 
     // create webgl context

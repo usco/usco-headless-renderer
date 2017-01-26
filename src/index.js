@@ -1,10 +1,11 @@
 import fs from 'fs'
 import { from } from 'most'
 
-import stlParser from 'usco-stl-parser'
 import ctmParser from 'usco-ctm-parser'
 import objParser from 'usco-obj-parser'
-/*import threeMfParser from 'usco-3mf-parser'*/
+
+import makeStlStream from 'usco-stl-parser'
+// import make3mfStream from 'usco-3mf-parser'
 
 import prepareRender from './render'
 import { writeContextToFile } from 'usco-image-utils'
@@ -16,9 +17,10 @@ import entityPrep from './utils/entityPrep'
 import { camera as camerabase } from './utils/camera'
 import { computeCameraToFitBounds, cameraOffsetToEntityBoundsCenter } from 'usco-camera-utils'
 
-
 import * as orbitControls from 'usco-orbit-controls'
 import mat4 from 'gl-mat4'
+
+var version = require('../package.json').version
 
 function setProjection (state, input) {
   const projection = mat4.perspective([], state.fov, input.width / input.height, // context.viewportWidth / context.viewportHeight,
@@ -33,7 +35,11 @@ function setProjection (state, input) {
 
 // ///////deal with command line args etc
 let args = process.argv.slice(2)
-
+if (args.length === 0) {
+  console.log(`usco-headless-renderer v${version}
+    use it like this : usco-headless-renderer <PATH-TO-FILE> '320x240' <PATH-TO-OUTPUT.png>
+    `)
+}
 if (args.length > 0) {
   // more advanced params handling , for later
   /*
@@ -55,11 +61,10 @@ if (args.length > 0) {
 
   const parseOptions = {concat: true}
   const parsers = {
-    'stl': stlParser(parseOptions),
+    'stl': makeStlStream(parseOptions),
     'ctm': ctmParser,
     'obj': objParser,
-
-  /*'3mf': threeMfParser*/
+  // '3mf': make3mfStream(parseOptions)
   }
 
   // create webgl context
@@ -67,7 +72,7 @@ if (args.length > 0) {
   // setup regl
   const regl = require('regl')({
     gl,
-    //extensions:['oes_element_index_uint']
+  // extensions:['oes_element_index_uint']
   }, (width, height))
   // setup render function
   const render = prepareRender(regl)
