@@ -8,7 +8,7 @@ import makeStlStream from 'usco-stl-parser'
 // import make3mfStream from 'usco-3mf-parser'
 
 import prepareRender from './render'
-import { writeContextToFile } from 'usco-image-utils'
+import {writeContextToFile} from 'usco-image-utils/dist/imgUtils'
 import { getNameAndExtension } from 'usco-file-utils'
 
 import create from '@most/create'
