@@ -1,14 +1,14 @@
 import fs from 'fs'
-import { from } from 'most'
+import { of, from } from 'most'
 
 import ctmParser from 'usco-ctm-parser'
 import objParser from 'usco-obj-parser'
 
 import makeStlStream from 'usco-stl-parser'
-// import make3mfStream from 'usco-3mf-parser'
+import make3mfStream from 'usco-3mf-parser'
 
 import prepareRender from './render'
-import {writeContextToFile} from 'usco-image-utils/dist/imgUtils'
+import { writeContextToFile } from 'usco-image-utils/dist/imgUtils'
 import { getNameAndExtension } from 'usco-file-utils'
 
 import create from '@most/create'
@@ -55,6 +55,7 @@ if (args.length > 0) {
 
   const {ext} = getNameAndExtension(uri)
   const resolution = {width, height}
+  const cameraAngle = 0
 
   // console.log('outputPath', outputPath, 'ext', ext)
   console.log('Running renderer with params', uri, resolution, outputPath)
@@ -62,9 +63,9 @@ if (args.length > 0) {
   const parseOptions = {concat: true}
   const parsers = {
     'stl': makeStlStream(parseOptions),
+    '3mf': make3mfStream(parseOptions),
     'ctm': ctmParser,
-    'obj': objParser,
-  // '3mf': make3mfStream(parseOptions)
+    'obj': objParser
   }
 
   // create webgl context
@@ -82,23 +83,29 @@ if (args.length > 0) {
     if (!parser) {
       error(new Error(`no parser found for ${ext} format`))
     }
-    if (ext === 'stl') {
+    if (ext === 'stl' || ext === '3mf') {
       fs.createReadStream(uri)
         .pipe(parsers[ext]) // we get a stream back
         .on('data', function (parsedData) {
-          add(parsedData)
+          add([parsedData])
         })
     } else {
       let data = fs.readFileSync(uri, 'binary')
       const parsedObs$ = parsers[ext](data, {})
       parsedObs$
-        .forEach(add)
+        .forEach(parsed => add([parsed]))
     }
   })
 
   entityPrep(parsedData$, regl)
-    .forEach(function (entity) {
-      const {bounds, transforms} = entity
+    .flatMapError(error => {
+      console.error(error)
+      of(undefined)
+    })
+    .filter(x => x !== undefined)
+    .forEach(function (entities) {
+      console.log(entities)
+      const {bounds, transforms} = entities[0]
       let controlParams = orbitControls.params
       controlParams.limits.minDistance = 0
       camerabase.near = 0.01
@@ -108,7 +115,7 @@ if (args.length > 0) {
       camera = Object.assign({}, camera, computeCameraToFitBounds({camera, bounds, transforms}))
       camera = Object.assign({}, camera, orbitControls.update(controlParams, camera))
 
-      render({entities: [entity], camera, view: camera.view, background: [1, 1, 1, 1]})
+      render({entities, camera, view: camera.view, background: [1, 1, 1, 1]})
       writeContextToFile(gl, width, height, 4, outputPath)
     })
 
