@@ -22,6 +22,13 @@ This is a command line thumbnail image renderer of 3d files, using webgl
 
 ## Installation
 
+as a command line tool (typical use case)
+
+```
+npm install -g --production usco/usco-headless-renderer
+```
+
+as a module
 
 ```
 npm install usco/usco-headless-renderer
