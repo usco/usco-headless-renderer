@@ -10,9 +10,9 @@ import { drawStaticMesh2 as drawStaticMesh } from 'usco-render-utils'
   - even if regl can 'combine' various uniforms, attributes, props etc, the rule above still applies
 */
 
-export default function entityPrep (rawGeometry$, regl) {
+export default function entityPrep (rawData$, regl) {
   // NOTE : rotation needs to be manually inverted , or an additional geometry transformation applied
-  const addedEntities$ = rawGeometry$
+  const addedEntities$ = rawData$
     .map(geometry => ({
       transforms: {pos: [0, 0, 0], rot: [0, 0, Math.PI], sca: [1, 1, 1]}, // [0.2, 1.125, 1.125]},
       geometry,
@@ -58,7 +58,6 @@ export default function entityPrep (rawGeometry$, regl) {
       const entity = Object.assign({}, data, {visuals}) // Object.assign({}, data, {visuals: {draw}})
       return entity
     })
-
     .multicast()
 
   return addedEntities$

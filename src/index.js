@@ -20,7 +20,9 @@ import { computeCameraToFitBounds, cameraOffsetToEntityBoundsCenter } from 'usco
 import * as orbitControls from 'usco-orbit-controls'
 import mat4 from 'gl-mat4'
 
-var version = require('../package.json').version
+import { getArgs } from './utils/args'
+
+const version = require('../package.json').version
 
 function setProjection (state, input) {
   const projection = mat4.perspective([], state.fov, input.width / input.height, // context.viewportWidth / context.viewportHeight,
@@ -33,94 +35,96 @@ function setProjection (state, input) {
   return state
 }
 
-// ///////deal with command line args etc
-let args = process.argv.slice(2)
-if (args.length === 0) {
-  console.log(`usco-headless-renderer v${version}
-    use it like this : usco-headless-renderer <PATH-TO-FILE> '320x240' <PATH-TO-OUTPUT.png>
-    `)
+// deal with command line args etc
+let inputParams = getArgs()
+
+const defaults = {
+  resolution: '640x480',
+  cameraPosition: camerabase.position,
+  input: undefined,
+  output: 'output.png'
 }
-if (args.length > 0) {
-  // more advanced params handling , for later
-  /*
-    console.log("params",args)
-    let params = args.reduce(function(cur,combo){
-    let [name,val]= cur.split("=")
-    combo[name] = val
-  },{})*/
+let params = Object.assign({}, defaults, inputParams)
 
-  const uri = args[0]
-  const [width, height] = args[1].split('x').map(e => parseInt(e, 10))
-  const outputPath = args[2] ? args[2] : `${uri}.png`
+const {resolution, cameraPosition, input} = params
+const outputPath = params.output
+const [width, height] = resolution.split('x').map(e => parseInt(e, 10))
+const {ext} = getNameAndExtension(input)
 
-  const {ext} = getNameAndExtension(uri)
-  const resolution = {width, height}
-  const cameraAngle = 0
+if (Object.keys(inputParams).length === 0) {
+  console.log(`usco-headless-renderer v${version}
+    Missing parameters:
+    use it like this : usco-headless-renderer input=<PATH-TO-FILE> output=<PATH-TO-OUTPUT.png> resolution=320x240 cameraPosition=[250,150,2]
+    `)
+  process.exit(1)
+}
 
-  // console.log('outputPath', outputPath, 'ext', ext)
-  console.log('Running renderer with params', uri, resolution, outputPath)
+console.log(`Running renderer with params:
+  input:${input}, output:${outputPath}, resolution:${width}x${height}`)
 
-  const parseOptions = {concat: true}
-  const parsers = {
-    'stl': makeStlStream(parseOptions),
-    '3mf': make3mfStream(parseOptions),
-    'ctm': ctmParser,
-    'obj': objParser
+const parseOptions = {concat: true}
+const parsers = {
+  'stl': makeStlStream(parseOptions),
+  '3mf': make3mfStream(parseOptions),
+  'ctm': ctmParser,
+  'obj': objParser
+}
+
+// create webgl context
+const gl = require('gl')(width, height)
+// setup regl
+const regl = require('regl')({
+  gl,
+// extensions:['oes_element_index_uint']
+}, (width, height))
+// setup render function
+const render = prepareRender(regl)
+
+const parsedData$ = create((add, end, error) => {
+  const parser = parsers[ext]
+  if (!parser) {
+    error(new Error(`no parser found for ${ext} format`))
   }
+  if (ext === 'stl' || ext === '3mf') {
+    fs.createReadStream(input)
+      .pipe(parsers[ext]) // we get a stream back
+      .on('data', function (parsedData) {
+        add(parsedData)
+      })
+  } else {
+    let data = fs.readFileSync(input, 'binary')
+    const parsedObs$ = parsers[ext](data, {})
+    parsedObs$
+      .forEach(parsed => add(parsed))
+  }
+})
 
-  // create webgl context
-  const gl = require('gl')(width, height)
-  // setup regl
-  const regl = require('regl')({
-    gl,
-  // extensions:['oes_element_index_uint']
-  }, (width, height))
-  // setup render function
-  const render = prepareRender(regl)
+entityPrep(parsedData$, regl)
+  .flatMapError(error => {
+    console.error(error)
+    of(undefined)
+  })
+  .filter(x => x !== undefined)
+  .map(x => [x]) // FIXME: temporary hack until data structures are stable
+  .forEach(function (entities) {
+    //console.log(entities)
+    const {bounds, transforms} = entities[0]
+    let controlParams = orbitControls.params
+    controlParams.limits.minDistance = 0
+    camerabase.near = 0.01
+    camerabase.position = cameraPosition
 
-  const parsedData$ = create((add, end, error) => {
-    const parser = parsers[ext]
-    if (!parser) {
-      error(new Error(`no parser found for ${ext} format`))
-    }
-    if (ext === 'stl' || ext === '3mf') {
-      fs.createReadStream(uri)
-        .pipe(parsers[ext]) // we get a stream back
-        .on('data', function (parsedData) {
-          add([parsedData])
-        })
-    } else {
-      let data = fs.readFileSync(uri, 'binary')
-      const parsedObs$ = parsers[ext](data, {})
-      parsedObs$
-        .forEach(parsed => add([parsed]))
-    }
+    let camera = setProjection(camerabase, {width, height})
+    camera = Object.assign({}, camera, cameraOffsetToEntityBoundsCenter({camera, bounds, transforms, axis: 2}))
+    camera = Object.assign({}, camera, computeCameraToFitBounds({camera, bounds, transforms}))
+    camera = Object.assign({}, camera, orbitControls.update(controlParams, camera))
+
+    render({entities, camera, view: camera.view, background: [1, 1, 1, 1]})
+    writeContextToFile(gl, width, height, 4, outputPath)
   })
 
-  entityPrep(parsedData$, regl)
-    .flatMapError(error => {
-      console.error(error)
-      of(undefined)
-    })
-    .filter(x => x !== undefined)
-    .forEach(function (entities) {
-      console.log(entities)
-      const {bounds, transforms} = entities[0]
-      let controlParams = orbitControls.params
-      controlParams.limits.minDistance = 0
-      camerabase.near = 0.01
-
-      let camera = setProjection(camerabase, {width, height})
-      camera = Object.assign({}, camera, cameraOffsetToEntityBoundsCenter({camera, bounds, transforms, axis: 2}))
-      camera = Object.assign({}, camera, computeCameraToFitBounds({camera, bounds, transforms}))
-      camera = Object.assign({}, camera, orbitControls.update(controlParams, camera))
-
-      render({entities, camera, view: camera.view, background: [1, 1, 1, 1]})
-      writeContextToFile(gl, width, height, 4, outputPath)
-    })
-
-/*
-fs.createReadStream(uri)
+  /*
+  fs.createReadStream(input)
   .pipe(parsers[ext]) // we get a stream back
   .on('data', function (geometry) {
     console.log('done with parsing') // , parsedData)
@@ -128,4 +132,3 @@ fs.createReadStream(uri)
     render({entities: [], camera: {projection: null}, view: null, background: [1, 1, 1, 1]})
     writeContextToFile(gl, 256, 256, 4, outputPath)
   })*/
-}
