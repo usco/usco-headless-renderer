@@ -37,7 +37,7 @@ npm install usco/usco-headless-renderer
 ## Usage
 
 ```
-  usco-headless-renderer ./cube.stl 320x240 test.stl.png
+  usco-headless-renderer input=<PATH-TO-FILE> output=<PATH-TO-OUTPUT.png> resolution=320x240 cameraPosition=[75, 75, 145] verbose=true
 ```
 
 
