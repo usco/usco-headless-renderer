@@ -20,9 +20,9 @@ var _uscoRenderUtils = require('usco-render-utils');
 */
 
 // helpers
-function entityPrep(rawGeometry$, regl) {
+function entityPrep(rawData$, regl) {
   // NOTE : rotation needs to be manually inverted , or an additional geometry transformation applied
-  var addedEntities$ = rawGeometry$.map(function (geometry) {
+  var addedEntities$ = rawData$.map(function (geometry) {
     return {
       transforms: { pos: [0, 0, 0], rot: [0, 0, Math.PI], sca: [1, 1, 1] }, // [0.2, 1.125, 1.125]},
       geometry: geometry,

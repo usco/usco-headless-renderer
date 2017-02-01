@@ -110,10 +110,10 @@ function postProcessParsedData(data) {
 
     if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
   } else {
-    var _mesh = data;
-    _mesh = (0, _meshUtils.geometryFromBuffers)(_mesh);
-    _mesh = (0, _meshUtils.postProcessMesh)(_mesh);
-    _mesh = centerMesh(_mesh);
-    return _mesh;
+    var mesh = data;
+    mesh = (0, _meshUtils.geometryFromBuffers)(mesh);
+    mesh = (0, _meshUtils.postProcessMesh)(mesh);
+    mesh = centerMesh(mesh);
+    return mesh;
   }
 }
