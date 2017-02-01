@@ -39,7 +39,7 @@ test('server side renderer: can take a path to a file as input, generate a rende
   const expImagePath = path.resolve(__dirname, './data/exp.cube.stl.png')
   t.context = Object.assign({}, t.context, {outputPath})
 
-  const cmd = `node ${jamPath} ${inputPath} ${t.context.resolution} ${outputPath} `
+  const cmd = `node ${jamPath} input=${inputPath} output=${outputPath} resolution=${t.context.resolution}`
   require('child_process').execSync(cmd, {stdio: [0, 1, 2]})
   // t.deepEqual(meshSource[0], 'fakeModel.stl')
   t.deepEqual(true, existsSync(outputPath))
@@ -63,7 +63,7 @@ test('server side renderer: can take a path to a file as input, generate a rende
   const expImagePath = path.resolve(__dirname, './data/exp.cube_gears.3mf.png')
   t.context = Object.assign({}, t.context, {outputPath})
 
-  const cmd = `node ${jamPath} ${inputPath} ${t.context.resolution} ${outputPath} `
+  const cmd = `node ${jamPath} input=${inputPath} output=${outputPath} resolution=${t.context.resolution}`
   require('child_process').execSync(cmd, {stdio: [0, 1, 2]})
   t.deepEqual(true, existsSync(outputPath))
 
@@ -86,7 +86,7 @@ test('server side renderer: can take a path to a file as input, generate a rende
   const expImagePath = path.resolve(__dirname, './data/exp.cube.obj.png')
   t.context = Object.assign({}, t.context, {outputPath})
 
-  const cmd = `node ${jamPath} ${inputPath} ${t.context.resolution} ${outputPath} `
+  const cmd = `node ${jamPath} input=${inputPath} output=${outputPath} resolution=${t.context.resolution}`
   require('child_process').execSync(cmd, {stdio: [0, 1, 2]})
 
   t.deepEqual(true, existsSync(outputPath))
@@ -110,7 +110,7 @@ test('server side renderer: can take a path to a file as input, generate a rende
   const expImagePath = path.resolve(__dirname, './data/exp.LeePerry.ctm.png')
   t.context = Object.assign({}, t.context, {outputPath})
 
-  const cmd = `node ${jamPath} ${inputPath} ${t.context.resolution} ${outputPath} `
+  const cmd = `node ${jamPath} input=${inputPath} output=${outputPath} resolution=${t.context.resolution}`
   require('child_process').execSync(cmd, {stdio: [0, 1, 2]})
 
   t.deepEqual(true, existsSync(outputPath))
