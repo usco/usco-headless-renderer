@@ -42,11 +42,12 @@ const defaults = {
   resolution: '640x480',
   cameraPosition: `[${camerabase.position.join(',')}]`,
   input: undefined,
-  output: 'output.png'
+  output: 'output.png',
+  verbose: false
 }
 let params = Object.assign({}, defaults, inputParams)
 
-const {resolution, input} = params
+const {resolution, input, verbose} = params
 const outputPath = params.output
 const [width, height] = resolution.split('x').map(e => parseInt(e, 10))
 const cameraPosition = params.cameraPosition.replace('[', '').replace(']', '').replace(/' '/g, '').split(',').map(e => parseFloat(e, 10))
@@ -55,13 +56,15 @@ const {ext} = getNameAndExtension(input)
 if (Object.keys(inputParams).length === 0) {
   console.log(`usco-headless-renderer v${version}
     Missing parameters:
-    use it like this : usco-headless-renderer input=<PATH-TO-FILE> output=<PATH-TO-OUTPUT.png> resolution=320x240 cameraPosition=[75, 75, 145]
+    use it like this : usco-headless-renderer input=<PATH-TO-FILE> output=<PATH-TO-OUTPUT.png> resolution=320x240 cameraPosition=[75, 75, 145] verbose=true
     `)
   process.exit(1)
 }
 
-console.log(`Running renderer with params:
-  input:${input}, output:${outputPath}, resolution:${width}x${height}, cameraPosition:${cameraPosition}`)
+if (verbose) {
+  console.log(`Running renderer with params:
+    input:${input}, output:${outputPath}, resolution:${width}x${height}, cameraPosition:${cameraPosition}`)
+}
 
 const parseOptions = {concat: true}
 const parsers = {
