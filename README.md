@@ -37,8 +37,11 @@ npm install usco/usco-headless-renderer
 ## Usage
 
 ```
-  usco-headless-renderer input=<PATH-TO-FILE> output=<PATH-TO-OUTPUT.png> resolution=320x240 cameraPosition=[75, 75, 145] verbose=true
+  usco-headless-renderer input=<PATH-TO-FILE> output=<PATH-TO-OUTPUT.png> resolution=320x240 cameraPosition=[75,75,145] verbose=true
 ```
+
+>IMPORTANT !!! do NOT use spaces when defining the resolution or cameraPosition parameters, or things
+will break !
 
 
 ## Contribute
