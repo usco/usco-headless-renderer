@@ -2,6 +2,7 @@ import test from 'ava'
 import path from 'path'
 import fs from 'fs'
 import Jimp from 'jimp'
+const uuidV4 = require('uuid/v4')
 
 function existsSync (uri) {
   try {
@@ -30,12 +31,12 @@ test.beforeEach(t => {
 
 // note : use this with the node xxx command to debug in chrome: --inspect --debug-brk
 
-test('server side renderer: can take a path to a file as input, generate a render of that 3d file as ouput(stl)', t => {
+test('takes a path to a file as input, generates a render of that 3d file as ouput(stl)', t => {
   // FIXME: can only be run locally (webgl support needed), commented out for now for travisCI
   // see https://github.com/stackgl/headless-gl/blob/master/.travis.yml
   const jamPath = t.context.jamPath
   const inputPath = path.resolve(__dirname, './data/cube.stl')
-  const outputPath = path.resolve(__dirname, './test.stl.png')
+  const outputPath = path.resolve(__dirname, './test.stl.png' + uuidV4())
   const expImagePath = path.resolve(__dirname, './data/exp.cube.stl.png')
   t.context = Object.assign({}, t.context, {outputPath})
 
@@ -56,10 +57,37 @@ test('server side renderer: can take a path to a file as input, generate a rende
   })
 })
 
-test('server side renderer: can take a path to a file as input, generate a render of that 3d file as ouput(3mf)', t => {
+test('takes a path to a file as input, generates a render of that 3d file as ouput, with settable camera position(stl)', t => {
+  // FIXME: can only be run locally (webgl support needed), commented out for now for travisCI
+  // see https://github.com/stackgl/headless-gl/blob/master/.travis.yml
+  const jamPath = t.context.jamPath
+  const inputPath = path.resolve(__dirname, './data/cube.stl')
+  const outputPath = path.resolve(__dirname, './test.stl.png' + uuidV4())
+  const expImagePath = path.resolve(__dirname, './data/exp.cube_customCamera.stl.png')
+  t.context = Object.assign({}, t.context, {outputPath})
+
+  const cmd = `node ${jamPath} input=${inputPath} output=${outputPath} resolution=${t.context.resolution} cameraPosition=[250.56,-150.24,2.21]`
+  require('child_process').execSync(cmd, {stdio: [0, 1, 2]})
+  // t.deepEqual(meshSource[0], 'fakeModel.stl')
+  t.deepEqual(true, existsSync(outputPath))
+
+  return Promise.all([Jimp.read(expImagePath), Jimp.read(outputPath)])
+    .then(function (values) {
+      const [exp, obs] = values
+      const diff = Jimp.diff(exp, obs)
+      const dist = Jimp.distance(exp, obs)
+      const identical = (dist < 0.1 && diff.percent < 0.1)
+      t.deepEqual(true, identical)
+    }).catch(function () {
+    t.fail('Files are not identical', expImagePath, outputPath)
+  })
+})
+
+
+test('takes a path to a file as input, generates a render of that 3d file as ouput(3mf)', t => {
   const jamPath = t.context.jamPath
   const inputPath = path.resolve(__dirname, './data/cube_gears.3mf') // cube_gears.3mf'// dodeca_chain_loop_color.3mf'// pyramid_vertexcolor.3mf'
-  const outputPath = path.resolve(__dirname, './test.3mf.png')
+  const outputPath = path.resolve(__dirname, './test.3mf.png' + uuidV4())
   const expImagePath = path.resolve(__dirname, './data/exp.cube_gears.3mf.png')
   t.context = Object.assign({}, t.context, {outputPath})
 
@@ -79,10 +107,10 @@ test('server side renderer: can take a path to a file as input, generate a rende
   })
 })
 
-test('server side renderer: can take a path to a file as input, generate a render of that 3d file as ouput(obj)', t => {
+test('takes a path to a file as input, generates a render of that 3d file as ouput(obj)', t => {
   const jamPath = t.context.jamPath
   const inputPath = path.resolve(__dirname, './data/cube.obj')
-  const outputPath = path.resolve(__dirname, './test.obj.png')
+  const outputPath = path.resolve(__dirname, './test.obj.png' + uuidV4())
   const expImagePath = path.resolve(__dirname, './data/exp.cube.obj.png')
   t.context = Object.assign({}, t.context, {outputPath})
 
@@ -103,10 +131,10 @@ test('server side renderer: can take a path to a file as input, generate a rende
   })
 })
 
-test('server side renderer: can take a path to a file as input, generate a render of that 3d file as ouput(ctm)', t => {
+test('takes a path to a file as input, generates a render of that 3d file as ouput(ctm)', t => {
   const jamPath = t.context.jamPath
   const inputPath = path.resolve(__dirname, './data/LeePerry.ctm')
-  const outputPath = path.resolve(__dirname, './test.ctm.png')
+  const outputPath = path.resolve(__dirname, './test.ctm.png' + uuidV4())
   const expImagePath = path.resolve(__dirname, './data/exp.LeePerry.ctm.png')
   t.context = Object.assign({}, t.context, {outputPath})
 
