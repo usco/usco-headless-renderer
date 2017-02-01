@@ -8,21 +8,23 @@ export default {
   dest: 'dist/cli.js',
   format: 'cjs',
   moduleName: 'usco-headless-renderer',
-  sourceMap: true,
-  //preferBuiltins: false,
-  external: [
-  ],
+  sourceMap: 'inline',
+  external: [],
   plugins: [
     buble(),
     nodeResolve({
       jsnext: true,
-      main: true
+      main: true,
+      preferBuiltins: true,
+      skip: ['htmlparser2', 'entities', 'cheerio']
     }),
     commonjs({
+      namedExports: {
+        'node_modules/gl-vec3/index.js': ['vec3', 'squaredDistance'] // not sure why these do not get picked up
+      }
     }),
-    replace({
-      //'../../package.json': '../package.json',// fix path issues
-      "'use strict';": "#!/usr/bin/env node\n'use strict';"// add shebang at start of file
-    })
+    /*replace({
+      "'use strict';": "#!/usr/bin/env node\n'use strict';" // add shebang at start of file
+    })*/
   ]
 }
