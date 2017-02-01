@@ -40,27 +40,28 @@ let inputParams = getArgs()
 
 const defaults = {
   resolution: '640x480',
-  cameraPosition: camerabase.position,
+  cameraPosition: `[${camerabase.position.join(',')}]`,
   input: undefined,
   output: 'output.png'
 }
 let params = Object.assign({}, defaults, inputParams)
 
-const {resolution, cameraPosition, input} = params
+const {resolution, input} = params
 const outputPath = params.output
 const [width, height] = resolution.split('x').map(e => parseInt(e, 10))
+const cameraPosition = params.cameraPosition.replace('[', '').replace(']', '').replace(/' '/g, '').split(',').map(e => parseFloat(e, 10))
 const {ext} = getNameAndExtension(input)
 
 if (Object.keys(inputParams).length === 0) {
   console.log(`usco-headless-renderer v${version}
     Missing parameters:
-    use it like this : usco-headless-renderer input=<PATH-TO-FILE> output=<PATH-TO-OUTPUT.png> resolution=320x240 cameraPosition=[250,150,2]
+    use it like this : usco-headless-renderer input=<PATH-TO-FILE> output=<PATH-TO-OUTPUT.png> resolution=320x240 cameraPosition=[75, 75, 145]
     `)
   process.exit(1)
 }
 
 console.log(`Running renderer with params:
-  input:${input}, output:${outputPath}, resolution:${width}x${height}`)
+  input:${input}, output:${outputPath}, resolution:${width}x${height}, cameraPosition:${cameraPosition}`)
 
 const parseOptions = {concat: true}
 const parsers = {
@@ -107,7 +108,7 @@ entityPrep(parsedData$, regl)
   .filter(x => x !== undefined)
   .map(x => [x]) // FIXME: temporary hack until data structures are stable
   .forEach(function (entities) {
-    //console.log(entities)
+    // console.log(entities)
     const {bounds, transforms} = entities[0]
     let controlParams = orbitControls.params
     controlParams.limits.minDistance = 0
