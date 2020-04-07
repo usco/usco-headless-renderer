@@ -1,9 +1,15 @@
 import boundUtils from 'usco-bounds-utils'
+
+import geometryUtils from 'usco-geometry-utils'
+import transformUtils from 'usco-transform-utils'
+
 /* import { computeBounds } from 'usco-bounds-utils'
 import { computeTMatrixFromTransforms } from 'usco-transform-utils'
 import { computeNormalsFromUnindexedPositions, doNormalsNeedComputing } from 'usco-geometry-utils' */
 
 const { computeBounds } = boundUtils
+const { computeTMatrixFromTransforms } = transformUtils
+const { computeNormalsFromUnindexedPositions, doNormalsNeedComputing } = geometryUtils
 
 // inject bounding box(& co) data
 export function injectBounds (entity) {
