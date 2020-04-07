@@ -1,5 +1,5 @@
 
-import { makeWrapperScope } from './render-utils/index'
+import { makeWrapperScope } from './render-utils/index.js'
 
 export default function prepareRender (regl, params) {
   const wrapperScope = makeWrapperScope(regl)

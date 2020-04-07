@@ -19,7 +19,8 @@ export default function drawMesh (regl, params = { extras: {} }) {
     const isOdd = ([props.model[0], props.model[5], props.model[10]].filter(x => x < 0).length) & 1 // count the number of negative components & deterine if that is odd or even
     return isOdd ? 'front' : 'back'
   } : 'front'
-  // console.log('has vertex colors', hasVertexColors)
+
+  console.log('has vertex colors', hasVertexColors)
 
   const vert = hasVertexColors ? shadersVColors.vert : shadersMesh.vert
   const frag = hasVertexColors ? shadersVColors.frag : shadersMesh.frag

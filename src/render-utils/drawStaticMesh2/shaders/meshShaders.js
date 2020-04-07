@@ -60,7 +60,7 @@ attribute vec3 position, normal;
 varying vec3 fragNormal, fragPosition;
 varying vec4 _worldSpacePosition;
 
-#pragma glslify: zBufferAdjust = require('../../shaders/zBufferAdjust')
+// #pragma glslify: zBufferAdjust = require('../../shaders/zBufferAdjust')
 
 void main() {
   fragPosition = position;

@@ -85,9 +85,9 @@ const parsers = {
 }
 
 // create webgl context
-const gl = makeGl(width, height)
+const gl = makeGl.default(width, height)
 // setup regl
-const regl = makeRegl({
+const regl = makeRegl.default({
   gl
 // extensions:['oes_element_index_uint']
 }, (width, height))
@@ -134,6 +134,7 @@ entityPrep(parsedData$, regl)
     camera = Object.assign({}, camera, orbitControls.update(controlParams, camera))
 
     render({ entities, camera, view: camera.view, background: [1, 1, 1, 1] })
+    console.log('done rendering')
     imageUtils.writeContextToFile(gl, width, height, 4, outputPath)
   })
 
