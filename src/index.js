@@ -8,8 +8,7 @@ import makeStlStream from 'usco-stl-parser'
 import make3mfStream from 'usco-3mf-parser'
 
 import prepareRender from './render.js'
-import imageUtils from 'usco-image-utils'
-// import { writeContextToFile } from 'usco-image-utils'
+import { writeContextToFile } from './image-utils/imgUtils'
 // import { getNameAndExtension } from 'usco-file-utils'
 import fileUtils from 'usco-file-utils'
 
@@ -121,9 +120,10 @@ entityPrep(parsedData$, regl)
   .filter(x => x !== undefined)
   .map(x => [x]) // FIXME: temporary hack until data structures are stable
   .forEach(function (entities) {
+    // FIXME: add error handling !otherwise this can fail silently !
     // console.log(entities)
     const { bounds, transforms } = entities[0]
-    let controlParams = orbitControls.params
+    let controlParams = orbitControls.default.params
     controlParams.limits.minDistance = 0
     camerabase.near = 0.01
     camerabase.position = cameraPosition
@@ -131,11 +131,11 @@ entityPrep(parsedData$, regl)
     let camera = setProjection(camerabase, { width, height })
     camera = Object.assign({}, camera, cameraUtils.cameraOffsetToEntityBoundsCenter({ camera, bounds, transforms, axis: 2 }))
     camera = Object.assign({}, camera, cameraUtils.computeCameraToFitBounds({ camera, bounds, transforms }))
-    camera = Object.assign({}, camera, orbitControls.update(controlParams, camera))
+    camera = Object.assign({}, camera, orbitControls.default.update(controlParams, camera))
 
     render({ entities, camera, view: camera.view, background: [1, 1, 1, 1] })
     console.log('done rendering')
-    imageUtils.writeContextToFile(gl, width, height, 4, outputPath)
+    writeContextToFile(gl, width, height, 4, outputPath)
   })
 
 /*
