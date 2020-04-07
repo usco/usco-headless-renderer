@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { of, from } from 'most'
+import most from 'most'
 
 import ctmParser from 'usco-ctm-parser'
 import objParser from 'usco-obj-parser'
@@ -7,22 +7,32 @@ import objParser from 'usco-obj-parser'
 import makeStlStream from 'usco-stl-parser'
 import make3mfStream from 'usco-3mf-parser'
 
-import prepareRender from './render'
-import { writeContextToFile } from 'usco-image-utils/dist/imgUtils'
-import { getNameAndExtension } from 'usco-file-utils'
+import prepareRender from './render.js'
+import imageUtils from 'usco-image-utils'
+// import { writeContextToFile } from 'usco-image-utils'
+// import { getNameAndExtension } from 'usco-file-utils'
+import fileUtils from 'usco-file-utils'
 
 import create from '@most/create'
-import entityPrep from './utils/entityPrep'
+import entityPrep from './utils/entityPrep.js'
 
-import { camera as camerabase } from './utils/camera'
-import { computeCameraToFitBounds, cameraOffsetToEntityBoundsCenter } from 'usco-camera-utils'
+import { camera as camerabase } from './utils/camera.js'
+// import { computeCameraToFitBounds, cameraOffsetToEntityBoundsCenter } from 'usco-camera-utils'
+import cameraUtils from 'usco-camera-utils'
 
 import * as orbitControls from 'usco-orbit-controls'
 import mat4 from 'gl-mat4'
 
-import { getArgs } from './utils/args'
+import { getArgs } from './utils/args.js'
+import * as makeRegl from 'regl'
+import * as makeGl from 'gl'
 
-const version = require('../package.json').version
+// const version = require('../package.json').version
+// FIXME
+const version = '0.0.1'
+// JSON.parse(fs.readFileSync('../package.json')).version
+
+console.log('makeStlStream', makeStlStream)
 
 function setProjection (state, input) {
   const projection = mat4.perspective([], state.fov, input.width / input.height, // context.viewportWidth / context.viewportHeight,
@@ -47,11 +57,11 @@ const defaults = {
 }
 let params = Object.assign({}, defaults, inputParams)
 
-const {resolution, input, verbose} = params
+const { resolution, input, verbose } = params
 const outputPath = params.output
 const [width, height] = resolution.split('x').map(e => parseInt(e, 10))
 const cameraPosition = params.cameraPosition.replace('[', '').replace(']', '').replace(/' '/g, '').split(',').map(e => parseFloat(e, 10))
-const {ext} = getNameAndExtension(input)
+const { ext } = fileUtils.getNameAndExtension(input)
 
 if (Object.keys(inputParams).length === 0) {
   console.log(`usco-headless-renderer v${version}
@@ -66,19 +76,19 @@ if (verbose) {
     input:${input}, output:${outputPath}, resolution:${width}x${height}, cameraPosition:${cameraPosition}`)
 }
 
-const parseOptions = {concat: true}
+const parseOptions = { concat: true }
 const parsers = {
-  'stl': makeStlStream(parseOptions),
-  '3mf': make3mfStream(parseOptions),
+  'stl': makeStlStream.default(parseOptions),
+  '3mf': make3mfStream.default(parseOptions),
   'ctm': ctmParser,
   'obj': objParser
 }
 
 // create webgl context
-const gl = require('gl')(width, height)
+const gl = makeGl(width, height)
 // setup regl
-const regl = require('regl')({
-  gl,
+const regl = makeRegl({
+  gl
 // extensions:['oes_element_index_uint']
 }, (width, height))
 // setup render function
@@ -106,28 +116,28 @@ const parsedData$ = create((add, end, error) => {
 entityPrep(parsedData$, regl)
   .flatMapError(error => {
     console.error(error)
-    of(undefined)
+    most.of(undefined)
   })
   .filter(x => x !== undefined)
   .map(x => [x]) // FIXME: temporary hack until data structures are stable
   .forEach(function (entities) {
     // console.log(entities)
-    const {bounds, transforms} = entities[0]
+    const { bounds, transforms } = entities[0]
     let controlParams = orbitControls.params
     controlParams.limits.minDistance = 0
     camerabase.near = 0.01
     camerabase.position = cameraPosition
 
-    let camera = setProjection(camerabase, {width, height})
-    camera = Object.assign({}, camera, cameraOffsetToEntityBoundsCenter({camera, bounds, transforms, axis: 2}))
-    camera = Object.assign({}, camera, computeCameraToFitBounds({camera, bounds, transforms}))
+    let camera = setProjection(camerabase, { width, height })
+    camera = Object.assign({}, camera, cameraUtils.cameraOffsetToEntityBoundsCenter({ camera, bounds, transforms, axis: 2 }))
+    camera = Object.assign({}, camera, cameraUtils.computeCameraToFitBounds({ camera, bounds, transforms }))
     camera = Object.assign({}, camera, orbitControls.update(controlParams, camera))
 
-    render({entities, camera, view: camera.view, background: [1, 1, 1, 1]})
-    writeContextToFile(gl, width, height, 4, outputPath)
+    render({ entities, camera, view: camera.view, background: [1, 1, 1, 1] })
+    imageUtils.writeContextToFile(gl, width, height, 4, outputPath)
   })
 
-  /*
+/*
   fs.createReadStream(input)
   .pipe(parsers[ext]) // we get a stream back
   .on('data', function (geometry) {
@@ -135,4 +145,4 @@ entityPrep(parsedData$, regl)
 
     render({entities: [], camera: {projection: null}, view: null, background: [1, 1, 1, 1]})
     writeContextToFile(gl, 256, 256, 4, outputPath)
-  })*/
+  }) */
