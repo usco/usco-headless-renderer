@@ -1,4 +1,4 @@
-import bufferToPng from './bufferToPng'
+import bufferToPng from './bufferToPng.js'
 
 export function contextToBuffer (gl, width, height, depth = 4) {
   let buffer = new Uint8Array(width * height * depth)

@@ -24,6 +24,7 @@
     "glslify": "7.0.0",
     "most": "1.8.0",
     "regl": "1.4.2",
+    "pngjs":"3.4.0",
     "usco-3mf-parser": "github:usco/usco-3mf-parser",
     "usco-stl-parser": "github:usco/usco-stl-parser#streaming",
     "usco-bounds-utils": "github:usco/usco-bounds-utils",

@@ -1,4 +1,7 @@
 import fs from 'fs'
+import {dirname, resolve} from 'path'
+import { fileURLToPath } from 'url';
+
 import most from 'most'
 
 import ctmParser from 'usco-ctm-parser'
@@ -8,7 +11,7 @@ import makeStlStream from 'usco-stl-parser'
 import make3mfStream from 'usco-3mf-parser'
 
 import prepareRender from './render.js'
-import { writeContextToFile } from './image-utils/imgUtils'
+import { writeContextToFile } from './image-utils/imgUtils.js'
 // import { getNameAndExtension } from 'usco-file-utils'
 import fileUtils from 'usco-file-utils'
 
@@ -26,12 +29,8 @@ import { getArgs } from './utils/args.js'
 import * as makeRegl from 'regl'
 import * as makeGl from 'gl'
 
-// const version = require('../package.json').version
-// FIXME
-const version = '0.0.1'
-// JSON.parse(fs.readFileSync('../package.json')).version
-
-console.log('makeStlStream', makeStlStream)
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const version = JSON.parse(fs.readFileSync(resolve(__dirname,'../package.json'))).version
 
 function setProjection (state, input) {
   const projection = mat4.perspective([], state.fov, input.width / input.height, // context.viewportWidth / context.viewportHeight,
@@ -134,7 +133,6 @@ entityPrep(parsedData$, regl)
     camera = Object.assign({}, camera, orbitControls.default.update(controlParams, camera))
 
     render({ entities, camera, view: camera.view, background: [1, 1, 1, 1] })
-    console.log('done rendering')
     writeContextToFile(gl, width, height, 4, outputPath)
   })
 

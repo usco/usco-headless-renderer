@@ -20,13 +20,10 @@ export default function drawMesh (regl, params = { extras: {} }) {
     return isOdd ? 'front' : 'back'
   } : 'front'
 
-  console.log('has vertex colors', hasVertexColors)
+  // console.log('has vertex colors', hasVertexColors)
 
   const vert = hasVertexColors ? shadersVColors.vert : shadersMesh.vert
   const frag = hasVertexColors ? shadersVColors.frag : shadersMesh.frag
-
-  // const vert = glslify(__dirname + '/shaders/mesh-vcolor.vert')
-  // const frag = glslify(__dirname + '/shaders/mesh-vcolor.frag')
 
   let commandParams = {
     vert,
