@@ -1,11 +1,17 @@
 // helpers
 /* import { centerGeometry } from 'usco-geometry-utils'
 import { offsetTransformsByBounds } from 'usco-transform-utils'
-import { drawStaticMesh2 as drawStaticMesh } from 'usco-render-utils'
-import { injectNormals, injectTMatrix, injectBounds } from './prepHelpers.js' */
+import { drawStaticMesh2 as drawStaticMesh } from 'usco-render-utils' */
+
+import { injectNormals, injectTMatrix, injectBounds } from './prepHelpers.js'
 
 import geometryUtils from 'usco-geometry-utils'
+import transformUtils from 'usco-transform-utils'
+import renderUtils from 'usco-render-utils'
+
 const { centerGeometry } = geometryUtils
+const { offsetTransformsByBounds } = transformUtils
+const drawStaticMesh = renderUtils.drawStaticMesh2
 
 /* Pipeline:
   - data => process (normals computation, color format conversion) => (drawCall generation) => drawCall
