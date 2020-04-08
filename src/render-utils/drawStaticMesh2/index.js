@@ -13,15 +13,15 @@ export default function drawMesh (regl, params = { extras: {} }) {
 
   dynamicCulling = false
   // vertex colors or not ?
-  const hasIndices = (geometry.indices && geometry.indices.length > 0)
-  const hasNormals = (geometry.normals && geometry.normals.length > 0)
-  const hasVertexColors = (geometry.colors && geometry.colors.length > 0)
+  const hasIndices = ('indices' in geometry && geometry.indices.length > 0)
+  const hasNormals = ('normals' in geometry && geometry.normals.length > 0)
+  const hasVertexColors = ('colors' in geometry && geometry.colors.length > 0)
   const cullFace = dynamicCulling ? function (context, props) {
     const isOdd = ([props.model[0], props.model[5], props.model[10]].filter(x => x < 0).length) & 1 // count the number of negative components & deterine if that is odd or even
     return isOdd ? 'front' : 'back'
-  } : 'front'
+  } : 'back'
 
-  console.log('has vertex colors', hasVertexColors)
+  // console.log('has vertex colors', hasVertexColors)
 
   const vert = hasVertexColors ? shadersVColors.vert : shadersMesh.vert
   const frag = hasVertexColors ? shadersVColors.frag : shadersMesh.frag
