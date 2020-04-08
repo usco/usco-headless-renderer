@@ -13,11 +13,13 @@ This is a command line thumbnail image renderer of 3d files, using webgl
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [API](#api)
-- [Contribute](#contribute)
-- [License](#license)
+- [usco-headless-renderer](#usco-headless-renderer)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [System dependencies](#system-dependencies)
+  - [Usage](#usage)
+  - [Contribute](#contribute)
+  - [License](#license)
 
 
 ## Installation
@@ -33,6 +35,16 @@ as a module
 ```
 npm install usco/usco-headless-renderer
 ```
+
+## System dependencies
+
+You also need to install a few packages on your system (needed for headless webgl rendering): for Debian/Ubuntu these are :
+
+- [x] sudo apt-get install pkg-config
+- [x] sudo apt-get install xvfb
+- [x] sudo apt-get install libx11-dev
+- [x] sudo apt-get install libxi-dev
+- [x] sudo apt-get install libgl1-mesa-dev
 
 ## Usage
 

@@ -22,9 +22,9 @@ export default {
       namedExports: {
         'node_modules/gl-vec3/index.js': ['vec3', 'squaredDistance'] // not sure why these do not get picked up
       }
-    }),
-    /*replace({
+    })
+    /* replace({
       "'use strict';": "#!/usr/bin/env node\n'use strict';" // add shebang at start of file
-    })*/
+    }) */
   ]
 }
