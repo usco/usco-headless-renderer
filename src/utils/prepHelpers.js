@@ -23,7 +23,6 @@ export function injectBounds (entity) {
 export function injectTMatrix (entity) {
   const modelMat = computeTMatrixFromTransforms(entity.transforms)
   const result = Object.assign({}, entity, { modelMat })
-  // console.log('result', result)
   return result
 }
 
