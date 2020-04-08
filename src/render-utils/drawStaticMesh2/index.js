@@ -9,8 +9,9 @@ export default function drawMesh (regl, params = { extras: {} }) {
     dynamicCulling: false,
     geometry: undefined
   }
-  const { geometry, dynamicCulling } = Object.assign({}, defaults, params)
+  let { geometry, dynamicCulling } = Object.assign({}, defaults, params)
 
+  dynamicCulling = false
   // vertex colors or not ?
   const hasIndices = (geometry.indices && geometry.indices.length > 0)
   const hasNormals = (geometry.normals && geometry.normals.length > 0)
@@ -20,7 +21,7 @@ export default function drawMesh (regl, params = { extras: {} }) {
     return isOdd ? 'front' : 'back'
   } : 'front'
 
-  // console.log('has vertex colors', hasVertexColors)
+  console.log('has vertex colors', hasVertexColors)
 
   const vert = hasVertexColors ? shadersVColors.vert : shadersMesh.vert
   const frag = hasVertexColors ? shadersVColors.frag : shadersMesh.frag
