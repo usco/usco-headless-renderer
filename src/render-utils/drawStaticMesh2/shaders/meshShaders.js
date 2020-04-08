@@ -1,16 +1,25 @@
-const meshFrag = `/*precision mediump float;
+const meshVert = `precision mediump float;
 
-uniform vec4 color;
-varying vec3 vnormal;
+uniform float camNear, camFar;
+uniform mat4 model, view, projection;
+
+attribute vec3 position, normal;
+
 varying vec3 fragNormal, fragPosition;
+varying vec4 _worldSpacePosition;
 
 void main() {
-  //gl_FragColor = color;
-  gl_FragColor = vec4(abs(fragNormal), 1.0);
-}*/
+  fragPosition = position;
+  fragNormal = normal;
+  vec4 worldSpacePosition = model * vec4(position, 1);
+  _worldSpacePosition = worldSpacePosition;
 
+  vec4 glPosition = projection * view * model * vec4(position, 1);
+  gl_Position = glPosition;
+}
+`
 
-
+const meshFrag = `
 precision mediump float;
 varying vec3 fragNormal;
 uniform float ambientLightAmount;
@@ -49,31 +58,5 @@ void main () {
 
   gl_FragColor = vec4((ambient + diffuse + diffuse2 * v), endColor.a);
 }`
-
-const meshVert = `precision mediump float;
-
-uniform float camNear, camFar;
-uniform mat4 model, view, projection;
-
-attribute vec3 position, normal;
-
-varying vec3 fragNormal, fragPosition;
-varying vec4 _worldSpacePosition;
-
-// #pragma glslify: zBufferAdjust = require('../../shaders/zBufferAdjust')
-
-void main() {
-  fragPosition = position;
-  fragNormal = normal;
-  vec4 worldSpacePosition = model * vec4(position, 1);
-  _worldSpacePosition = worldSpacePosition;
-  //gl_Position = projection * view * worldSpacePosition;
-
-
-  vec4 glPosition = projection * view * model * vec4(position, 1);
-  gl_Position = glPosition;
-  //gl_Position = zBufferAdjust(glPosition, camNear, camFar);
-}
-`
 
 export default { vert: meshVert, frag: meshFrag }

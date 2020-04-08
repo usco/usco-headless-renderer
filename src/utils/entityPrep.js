@@ -56,12 +56,11 @@ export default function entityPrep (rawData$, regl) {
       }
       data.geometry.indices = indicesSub
       console.log('indices',indices.length) */
-
       if (!regl.hasExtension('oes_element_index_uint') && data.geometry.indices) {
         data.geometry.indices = Uint16Array.from(data.geometry.indices)
       }
 
-      const draw = drawStaticMesh(regl, { geometry: geometry }) // one command per mesh, but is faster
+      const draw = drawStaticMesh(regl, { geometry }) // one command per mesh, but is faster
       const visuals = Object.assign({}, data.visuals, { draw })
       const entity = Object.assign({}, data, { visuals }) // Object.assign({}, data, {visuals: {draw}})
       return entity
