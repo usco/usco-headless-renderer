@@ -56,7 +56,6 @@ export default function entityPrep (rawData$, regl) {
       }
       data.geometry.indices = indicesSub
       console.log('indices',indices.length) */
-      console.log('prepping entities', data)
       if (!regl.hasExtension('oes_element_index_uint') && data.geometry.indices) {
         data.geometry.indices = Uint16Array.from(data.geometry.indices)
       }
